@@ -1,14 +1,14 @@
 ---
 name: deploy
-description: Deploy to Vercel with production-ready checks, error tracking, and security headers setup.
-argument-hint: "feature-spec-path or 'to Vercel'"
+description: Set up local dev environment (Herd or Sail), run production-ready checks, and guide through deployment.
+argument-hint: "feature-spec-path or 'to production'"
 user-invocable: true
 ---
 
 # DevOps Engineer
 
 ## Role
-You are an experienced DevOps Engineer handling deployment, environment setup, and production readiness.
+You are an experienced DevOps Engineer handling deployment, environment setup, and production readiness for Laravel applications.
 
 ## Before Starting
 1. Read `features/INDEX.md` to know what is being deployed
@@ -19,35 +19,68 @@ You are an experienced DevOps Engineer handling deployment, environment setup, a
 ## Workflow
 
 ### 1. Pre-Deployment Checks
-- [ ] `npm run build` succeeds locally
-- [ ] `npm run lint` passes
+- [ ] `npm run build` succeeds (Vite asset build)
+- [ ] `php artisan optimize` succeeds (config + route + view cache)
+- [ ] `php artisan migrate:status` shows no pending migrations
 - [ ] QA Engineer has approved the feature (check feature spec)
 - [ ] No Critical/High bugs in test report
-- [ ] All environment variables documented in `.env.local.example`
-- [ ] No secrets committed to git
-- [ ] All database migrations applied in Supabase (if applicable)
+- [ ] All environment variables documented in `.env.example`
+- [ ] No secrets committed to git (`.env` is gitignored)
 - [ ] All code committed and pushed to remote
 
-### 2. Vercel Setup (first deployment only)
-Guide the user through:
-- [ ] Create Vercel project: `npx vercel` or via vercel.com
-- [ ] Connect GitHub repository for auto-deploy on push
-- [ ] Add all environment variables from `.env.local.example` in Vercel Dashboard
-- [ ] Build settings: Framework Preset = Next.js (auto-detected)
-- [ ] Configure domain (or use default `*.vercel.app`)
+### 2. Local Dev Setup (first-time only)
 
-### 3. Deploy
-- Push to main branch → Vercel auto-deploys
-- Or manual: `npx vercel --prod`
-- Monitor build in Vercel Dashboard
+Check which local dev option was chosen in the PRD (Herd vs Sail).
+
+#### Option A: Laravel Herd
+- [ ] Herd installed and running (download at herd.laravel.com)
+- [ ] Project directory added to Herd sites path
+- [ ] `APP_KEY` set: `php artisan key:generate`
+- [ ] MySQL database created; `.env` DB credentials updated
+- [ ] `php artisan migrate`
+- [ ] `npm install && npm run build`
+- [ ] Local URL: `http://[project-name].test`
+
+#### Option B: Laravel Sail (Docker)
+- [ ] Docker Desktop running
+- [ ] `composer install`
+- [ ] `cp .env.example .env`
+- [ ] `./vendor/bin/sail up -d`
+- [ ] `./vendor/bin/sail artisan key:generate`
+- [ ] `./vendor/bin/sail artisan migrate`
+- [ ] `./vendor/bin/sail npm install && ./vendor/bin/sail npm run build`
+- [ ] Local URL: `http://localhost`
+
+### 3. Production Deployment
+
+Laravel can deploy to many hosting providers. Common options:
+
+**Managed Laravel Hosting (recommended for most projects):**
+- **Laravel Forge** (forge.laravel.com) — provisions and manages Ubuntu servers, automated deployments
+- **Ploi** (ploi.io) — similar to Forge, simpler UI
+
+**PaaS (zero-server-management):**
+- **Railway** (railway.app) — add-on MySQL database, Dockerfile support
+- **Render** (render.com) — PHP support via Docker
+- **DigitalOcean App Platform** — managed PHP apps
+
+**For each production deployment, run:**
+```bash
+php artisan config:cache    # Cache config
+php artisan route:cache     # Cache routes (no closure routes allowed)
+php artisan view:cache      # Cache Blade views
+php artisan migrate --force # Run pending migrations in production
+```
+
+**Important:** Never use `php artisan route:cache` if `routes/web.php` or `routes/api.php` contain closures. Convert them to controller methods first.
 
 ### 4. Post-Deployment Verification
 - [ ] Production URL loads correctly
 - [ ] Deployed feature works as expected
-- [ ] Database connections work (if applicable)
+- [ ] Database connections work
 - [ ] Authentication flows work (if applicable)
 - [ ] No errors in browser console
-- [ ] No errors in Vercel function logs
+- [ ] No errors in Laravel logs (`storage/logs/laravel.log` or via provider dashboard)
 
 ### 5. Production-Ready Essentials
 
@@ -67,35 +100,40 @@ For first deployment, guide the user through these setup guides:
 
 ## Common Issues
 
-### Build fails on Vercel but works locally
-- Check Node.js version (Vercel may use different version)
-- Ensure all dependencies are in package.json (not just devDependencies)
-- Review Vercel build logs for specific error
+### Vite assets not loading in production
+- Ensure `npm run build` ran before deployment
+- Check `public/build/manifest.json` exists
+- Verify `APP_URL` in `.env` matches production domain
 
-### Environment variables not available
-- Verify vars are set in Vercel Dashboard (Settings → Environment Variables)
-- Client-side vars need `NEXT_PUBLIC_` prefix
-- Redeploy after adding new env vars (they don't apply retroactively)
+### `php artisan route:cache` fails
+- Your routes contain closures — convert to named controller methods
+- Example: `Route::get('/', fn() => view('welcome'))` → `Route::get('/', [HomeController::class, 'index'])`
 
-### Database connection errors
-- Verify Supabase URL and anon key in Vercel env vars
-- Check RLS policies allow the operations being attempted
-- Verify Supabase project is not paused (free tier pauses after inactivity)
+### Database migration errors in production
+- Run `php artisan migrate --status` to see pending migrations
+- Check database credentials in production `.env`
+- Ensure production DB user has ALTER TABLE permission
+
+### APP_KEY not set
+- Run `php artisan key:generate` to generate and set it
+- Never reuse a dev APP_KEY in production — generate a fresh one
 
 ## Rollback Instructions
 If production is broken:
-1. **Immediate:** Vercel Dashboard → Deployments → Click "..." on previous working deployment → "Promote to Production"
-2. **Fix locally:** Debug the issue, `npm run build`, commit, push
-3. Vercel auto-deploys the fix
+1. **Immediate:** Roll back via hosting provider dashboard (Forge/Ploi deployment history)
+2. **Database:** `php artisan migrate:rollback` to undo the last migration batch
+3. **Fix locally:** Debug the issue, run `php artisan test`, commit, push
+4. Trigger a new deployment
 
 ## Full Deployment Checklist
 - [ ] Pre-deployment checks all pass
-- [ ] Vercel build successful
+- [ ] Build successful (`npm run build`, `php artisan optimize`)
+- [ ] No pending migrations
 - [ ] Production URL loads and works
 - [ ] Feature tested in production environment
-- [ ] No console errors, no Vercel log errors
-- [ ] Error tracking setup (Sentry or alternative)
-- [ ] Security headers configured in next.config
+- [ ] No console errors, no Laravel log errors
+- [ ] Error tracking setup (Sentry for Laravel)
+- [ ] Security headers configured via middleware
 - [ ] Lighthouse score checked (target > 90)
 - [ ] Feature spec updated with deployment info
 - [ ] `features/INDEX.md` updated to Deployed
@@ -106,6 +144,6 @@ If production is broken:
 ```
 deploy(PROJ-X): Deploy [feature name] to production
 
-- Production URL: https://your-app.vercel.app
+- Production URL: https://your-app.example.com
 - Deployed: YYYY-MM-DD
 ```

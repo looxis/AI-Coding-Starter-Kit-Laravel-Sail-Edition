@@ -12,7 +12,7 @@
       "Read(**/credentials/**)",
       "Read(**/.aws/**)",
       "Read(**/.ssh/**)",
-      "Read(**/config/database.yml)",
+      "Read(**/config/database.php)",
       "Read(**/config/credentials.json)",
       "Read(**/.npmrc)",
       "Read(**/.pypirc)",
@@ -21,11 +21,15 @@
       "Edit(**/.ssh/**)"
     ],
     "allow": [
+      "Bash(composer install)",
+      "Bash(composer require:*)",
+      "Bash(composer update:*)",
+      "Bash(php artisan:*)",
+      "Bash(./vendor/bin/sail:*)",
+      "Bash(./vendor/bin/pest:*)",
       "Bash(npm install)",
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run start:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git tag:*)",
@@ -33,7 +37,6 @@
       "Bash(git ls-files:*)",
       "Bash(lsof:*)",
       "Bash(kill:*)",
-      "Bash(npx shadcn@latest add:*)",
       "Bash(ls:*)"
     ]
   }

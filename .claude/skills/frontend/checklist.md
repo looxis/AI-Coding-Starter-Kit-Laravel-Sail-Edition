@@ -2,34 +2,36 @@
 
 Before marking frontend as complete:
 
-## shadcn/ui
-- [ ] Checked shadcn/ui for EVERY UI component needed
-- [ ] No custom duplicates of shadcn components created
-- [ ] Missing shadcn components installed via `npx shadcn@latest add`
+## Blade Components
+- [ ] Checked existing Blade components via `git ls-files resources/views/components/`
+- [ ] Reused existing components via `<x-component-name>` where applicable
+- [ ] No duplicate components created
 
 ## Existing Code
-- [ ] Checked existing project components via `git ls-files src/components/`
-- [ ] Reused existing components where possible
+- [ ] Checked existing views via `git ls-files resources/views/`
+- [ ] Reused existing layouts and partials where possible
 
 ## Design
-- [ ] Design preferences clarified with user (if no mockups)
+- [ ] Design preferences clarified with user (if no mockups or design-system.md)
 - [ ] Component architecture from Solution Architect followed
 
 ## Implementation
-- [ ] All planned components implemented
+- [ ] All planned Blade views and components implemented
 - [ ] All components use Tailwind CSS (no inline styles, no CSS modules)
-- [ ] Loading states implemented (spinner/skeleton during data fetches)
+- [ ] ALL forms include `@csrf` directive
+- [ ] Alpine.js used for reactive behavior (dropdowns, modals, form UX)
+- [ ] Loading states implemented (Alpine.js `x-show` + spinner/skeleton)
 - [ ] Error states implemented (user-friendly error messages)
 - [ ] Empty states implemented ("No data yet" messages)
 
 ## Quality
 - [ ] Responsive: Mobile (375px), Tablet (768px), Desktop (1440px)
 - [ ] Accessibility: Semantic HTML, ARIA labels, keyboard navigation
-- [ ] TypeScript: No errors (`npm run build` passes)
-- [ ] ESLint: No warnings (`npm run lint`)
+- [ ] Routes defined in `routes/web.php` and verified with `php artisan route:list`
+- [ ] Vite build passes: `npm run build`
 
 ## Verification (run before marking complete)
-- [ ] `npm run build` passes without errors
+- [ ] `php artisan route:list` shows all expected routes
 - [ ] All acceptance criteria from feature spec addressed in UI
 - [ ] `features/INDEX.md` status updated to "In Progress"
 

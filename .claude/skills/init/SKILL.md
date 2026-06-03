@@ -1,6 +1,6 @@
 ---
 name: init
-description: Initialize a new project. Creates the PRD and a prioritized feature map. Run once at the very start of a new project. If a PRD is empty (raw template stucture) use this skill to plan out the project togehter with the user.
+description: Initialize a new project. Creates the PRD and a prioritized feature map. Run once at the very start of a new project. If a PRD is empty (raw template structure) use this skill to plan out the project together with the user.
 argument-hint: "description of what you want to build"
 user-invocable: true
 ---
@@ -48,20 +48,28 @@ This question MUST be resolved before you create the feature map — it determin
 
 Ask:
 > "Does the app need to store data persistently or sync between users/devices?"
-> My recommendation: Yes — most apps need at least local persistence. If multiple users or cross-device sync is needed, a backend is required.
+> My recommendation: Yes — most apps need at least database persistence. MySQL via Laravel Eloquent covers all standard use cases.
 
 **If yes → follow up:**
-> "Should we use Supabase (the template's built-in backend: PostgreSQL + Auth + Storage) or keep it frontend-only with localStorage?"
-> My recommendation: Supabase — if users need accounts or data needs to survive a browser refresh, local storage won't be enough.
+> "Does the app need user authentication (login/register)?"
+> My recommendation: Yes if users need private data. We'll use Laravel Breeze for the auth scaffolding — it's the fastest path to working login/register.
 
-**If Supabase is chosen:**
-- Add **"Supabase Infrastructure Setup"** as **PROJ-1, P0** in the feature map
-- All features that require auth, data storage, or file uploads must list PROJ-1 as a dependency
-- This feature covers: project setup, environment variables, database schema outline, auth configuration
+**If authentication is needed:**
+- Add **"Laravel Authentication Setup"** as **PROJ-1, P0** in the feature map
+- All features that require a logged-in user must list PROJ-1 as a dependency
+- This feature covers: `php artisan breeze:install`, running migrations, auth routes (login, register, password reset), and auth middleware
 
-**If frontend-only (localStorage):**
-- No infrastructure feature needed
-- Note "No backend — localStorage only" in the PRD Constraints section
+**If no authentication (public app):**
+- No auth infrastructure feature needed
+- Note "No authentication — public app" in the PRD Constraints section
+
+### Mandatory: Local Dev Setup (ask before building the feature map)
+Ask:
+> "For local development, would you prefer **Laravel Herd** (simpler, native, no Docker) or **Laravel Sail** (Docker-based, portable)?"
+> My recommendation: Herd — it's faster to set up on Windows/Mac and has zero Docker overhead. Choose Sail if you need a reproducible Docker environment across machines.
+
+- If **Herd**: Note "Dev: Laravel Herd" in PRD Constraints. Commands use `php artisan` directly.
+- If **Sail**: Note "Dev: Laravel Sail (Docker)" in PRD Constraints. Commands use `./vendor/bin/sail artisan`.
 
 ### Mandatory: Design System (ask before building the feature map)
 Ask:
@@ -70,8 +78,8 @@ Ask:
 
 **Three ways the user can provide it:**
 1. **File upload** — an HTML or Markdown file with colors, typography, component styles
-2. **Manual input** — the user describes it directly (e.g. "dark theme, Inter font, blue primary #2563EB")
-3. **None** — use the template's default (Tailwind + shadcn/ui defaults)
+2. **Manual input** — the user describes it directly (e.g. "light theme, Inter font, blue primary #2563EB")
+3. **None** — use Tailwind CSS defaults with custom Blade components
 
 **If a design system is provided:**
 - Save it to `docs/design-system.md` (create the file with the provided content or a structured summary)
@@ -85,7 +93,7 @@ Once you have a complete understanding, write `docs/PRD.md` with:
 - **Target Users:** Who they are, their specific needs and pain points
 - **Core Features (Roadmap):** Prioritized table (P0 = MVP, P1 = next, P2 = later)
 - **Success Metrics:** Measurable outcomes
-- **Constraints:** Timeline, team, budget, technical limitations
+- **Constraints:** Timeline, team, budget, technical limitations (including local dev choice)
 - **Non-Goals:** What will NOT be built in this version
 
 Present the draft PRD to the user for review before saving. Apply feedback, then save.
@@ -119,10 +127,12 @@ Apply feedback, then update `features/INDEX.md` and the "Next Available ID" line
 
 ## Checklist Before Completion
 - [ ] PRD fully filled out (Vision, Target Users, Roadmap, Metrics, Constraints, Non-Goals)
-- [ ] Backend decision resolved (Supabase vs. localStorage)
-- [ ] If Supabase: "Supabase Infrastructure Setup" added as PROJ-1, P0, no dependencies
-- [ ] If Supabase: all data/auth-dependent features list PROJ-1 as dependency
-- [ ] If frontend-only: noted in PRD Constraints
+- [ ] Backend decision resolved (MySQL + Laravel Eloquent confirmed)
+- [ ] Authentication decision resolved
+- [ ] If auth needed: "Laravel Authentication Setup" added as PROJ-1, P0
+- [ ] If auth needed: all features requiring logged-in users list PROJ-1 as dependency
+- [ ] If no auth: noted "No authentication — public app" in PRD Constraints
+- [ ] Local dev setup decision resolved (Herd vs Sail) and noted in PRD Constraints
 - [ ] Design system decision resolved
 - [ ] If design system provided: saved to `docs/design-system.md` and referenced in PRD
 - [ ] Every feature respects Single Responsibility

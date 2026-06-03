@@ -1,40 +1,68 @@
-# AI Coding Starter Kit
+# AI Coding Starter Kit — Laravel Edition
 
-> Build production-ready web apps faster with AI-powered Skills handling Requirements, Architecture, Development, QA, and Deployment.
+> Build production-ready Laravel apps faster with AI-powered Skills handling Requirements, Architecture, Development, QA, and Deployment.
 
-This template uses [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with modern Skills, Rules, and Sub-Agents to provide a complete AI-powered development workflow.
+This template uses [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with modern Skills, Rules, and Sub-Agents to provide a complete AI-powered development workflow — adapted for the **Laravel / Blade / Tailwind / Alpine.js / MySQL / Pest** stack.
 
 ## Quick Start
 
-### 1. Clone & Install
+### Option A: Laravel Herd (recommended for Windows/Mac)
 
 ```bash
+# 1. Install Herd from herd.laravel.com — it manages PHP, MySQL, and local domains
+
+# 2. Clone into your Herd sites directory
+git clone https://github.com/YOUR_USERNAME/ai-coding-starter-kit.git ~/Herd/my-project
+cd ~/Herd/my-project
+
+# 3. Install PHP dependencies
+composer install
+
+# 4. Set up environment
+cp .env.example .env
+php artisan key:generate
+
+# 5. Create a MySQL database and update .env with DB credentials
+# DB_DATABASE=my_project, DB_USERNAME=root, DB_PASSWORD=
+
+# 6. Run migrations
+php artisan migrate
+
+# 7. Install and build assets
+npm install && npm run dev
+
+# 8. Open http://my-project.test in your browser
+```
+
+### Option B: Laravel Sail (Docker)
+
+```bash
+# 1. Install Docker Desktop
+
+# 2. Clone the repo
 git clone https://github.com/YOUR_USERNAME/ai-coding-starter-kit.git my-project
 cd my-project
-npm install
-npx playwright install chromium   # one-time: installs browser for E2E tests (~300MB)
+
+# 3. Install PHP dependencies (needs PHP on host or use the Docker workaround)
+composer install
+
+# 4. Set up environment
+cp .env.example .env
+
+# 5. Start Docker containers
+./vendor/bin/sail up -d
+
+# 6. Generate app key and run migrations
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+
+# 7. Build assets
+./vendor/bin/sail npm install && ./vendor/bin/sail npm run dev
+
+# 8. Open http://localhost in your browser
 ```
 
-### 2. (Optional) Supabase Setup
-
-If you need a backend:
-
-1. Create Supabase Project: [supabase.com](https://supabase.com)
-2. Copy `.env.local.example` to `.env.local`
-3. Add your Supabase credentials
-4. Uncomment the Supabase client in `src/lib/supabase.ts`
-
-Skip this step if you're building frontend-only (landing pages, portfolios, etc.)
-
-### 3. Start Development
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 4. Initialize Your Project
+### Initialize Your Project
 
 Open Claude Code and run `/init` with a brief description of your idea:
 
@@ -46,27 +74,26 @@ where users can create projects, assign tasks, and track progress.
 The skill interviews you one question at a time (**Grill Me** principle — always with a recommended answer you just confirm or correct) until there's a shared understanding. It then:
 1. Creates your **Product Requirements Document** (`docs/PRD.md`)
 2. Breaks the project into a prioritized feature map (P0/P1/P2)
-3. Updates **feature tracking** (`features/INDEX.md`)
-4. Recommends which feature to build first
+3. Decides on authentication and local dev setup
+4. Updates **feature tracking** (`features/INDEX.md`)
+5. Recommends which feature to build first
 
-### 5. Spec Your First Feature
-
-After initialization, create a detailed spec for the first feature:
+### Spec Your First Feature
 
 ```
 /write-spec PROJ-1
 ```
 
-The skill interviews you about this single feature in depth — user stories, edge cases, acceptance criteria. Use `/refine PROJ-X` at any point to revisit and improve an existing spec.
+The skill interviews you about this single feature in depth — user stories, edge cases, acceptance criteria in German Angenommen/Wenn/Dann format. Use `/refine PROJ-X` at any point to revisit and improve.
 
-### 6. Build Features
+### Build Features
 
 ```
 /architecture    Design the tech approach for features/PROJ-1-user-auth.md
-/frontend        Build the UI for features/PROJ-1-user-auth.md
-/backend         Build the API for features/PROJ-1-user-auth.md
+/frontend        Build the Blade UI for features/PROJ-1-user-auth.md
+/backend         Build controllers, models, migrations for features/PROJ-1-user-auth.md
 /qa              Test features/PROJ-1-user-auth.md
-/deploy          Deploy to Vercel
+/deploy          Deploy to production
 ```
 
 Each skill suggests the next step when it finishes. Handoffs are always user-initiated.
@@ -81,10 +108,10 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 | Feature Spec Writer | `/write-spec` | Creates a full spec for one feature (user stories, AC, edge cases) |
 | Spec Refiner | `/refine PROJ-X` | Reopens an existing spec to improve, extend, or challenge it |
 | Solution Architect | `/architecture` | Designs PM-friendly tech architecture (no code, only high-level design) |
-| Frontend Developer | `/frontend` | Builds UI with React, Tailwind CSS, and shadcn/ui |
-| Backend Developer | `/backend` | Builds APIs, database schemas, RLS policies with Supabase |
-| QA Engineer | `/qa` | Tests features against acceptance criteria + security audit |
-| DevOps | `/deploy` | Deploys to Vercel with production-ready checks |
+| Frontend Developer | `/frontend` | Builds UI with Blade templates, Alpine.js, and Tailwind CSS |
+| Backend Developer | `/backend` | Builds controllers, Eloquent models, migrations, Form Requests |
+| QA Engineer | `/qa` | Tests features against acceptance criteria + writes Pest tests + security audit |
+| DevOps | `/deploy` | Sets up Herd/Sail locally and guides through production deployment |
 | Help | `/help` | Context-aware guide: shows where you are and what to do next |
 
 ### How Skills Work
@@ -100,13 +127,13 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 
 ```
 0. Setup     /init          -->  PRD + feature map (once per project)
-1. Spec      /write-spec      -->  Feature spec in features/PROJ-X.md
+1. Spec      /write-spec    -->  Feature spec in features/PROJ-X.md
              /refine PROJ-X -->  Revisit and improve an existing spec
 2. Design    /architecture  -->  Tech design added to feature spec
-3. Build     /frontend      -->  UI components implemented
-             /backend       -->  APIs + database (if needed)
-4. Test      /qa            -->  Test results added to feature spec
-5. Ship      /deploy        -->  Deployed to Vercel
+3. Build     /frontend      -->  Blade views + Alpine.js implemented
+             /backend       -->  Controllers + models + migrations (if needed)
+4. Test      /qa            -->  Pest tests + security audit
+5. Ship      /deploy        -->  Deployed to production
 ```
 
 ### Feature Tracking
@@ -126,13 +153,14 @@ Every skill reads this file at start and updates it when done, preventing duplic
 
 | Category | Tool | Why? |
 |----------|------|------|
-| **Framework** | Next.js 16 | React + Server Components + App Router |
-| **Language** | TypeScript | Type safety |
-| **Styling** | Tailwind CSS | Utility-first CSS |
-| **UI Library** | shadcn/ui | Copy-paste, customizable components |
-| **Backend** | Supabase (optional) | PostgreSQL + Auth + Storage + Realtime |
-| **Deployment** | Vercel | Zero-config Next.js hosting |
-| **Validation** | Zod | Runtime type validation |
+| **Framework** | Laravel (PHP) | Full-stack MVC, batteries included |
+| **Templating** | Blade | Server-side templating with reusable components |
+| **Styling** | Tailwind CSS v3 | Utility-first CSS |
+| **JS Framework** | Alpine.js | Lightweight reactive behavior, no SPA overhead |
+| **Database** | MySQL | Relational database via Eloquent ORM |
+| **Validation** | Laravel Form Requests | Validation + authorization in one class |
+| **Testing** | Laravel Pest | Expressive PHP testing |
+| **Local Dev** | Laravel Herd / Sail | Native (Herd) or Docker (Sail) |
 
 ---
 
@@ -146,12 +174,12 @@ ai-coding-starter-kit/
 |   +-- settings.local.json          <-- Personal overrides (gitignored)
 |   +-- rules/                       <-- Auto-applied coding rules
 |   |   +-- general.md                   Git workflow, feature tracking
-|   |   +-- frontend.md                  shadcn/ui, component standards
-|   |   +-- backend.md                   RLS, validation, queries
-|   |   +-- security.md                  Secrets, headers, auth
+|   |   +-- frontend.md                  Blade components, Alpine.js, CSRF
+|   |   +-- backend.md                   Form Requests, Eloquent, Policies
+|   |   +-- security.md                  Secrets, CSRF, auth, headers
 |   +-- skills/                      <-- Invocable workflows (/command)
 |   |   +-- init/SKILL.md                /init
-|   |   +-- write-spec/SKILL.md           /write-spec
+|   |   +-- write-spec/SKILL.md          /write-spec
 |   |   +-- refine/SKILL.md              /refine
 |   |   +-- architecture/SKILL.md        /architecture
 |   |   +-- frontend/SKILL.md            /frontend (runs as sub-agent)
@@ -169,48 +197,32 @@ ai-coding-starter-kit/
 +-- docs/
 |   +-- PRD.md                       <-- Product Requirements Document
 |   +-- production/                  <-- Production setup guides
-|       +-- error-tracking.md            Sentry setup (5 min)
-|       +-- security-headers.md          XSS/Clickjacking protection
-|       +-- performance.md               Lighthouse, optimization
-|       +-- database-optimization.md     Indexing, N+1, caching
-|       +-- rate-limiting.md             Upstash Redis
-+-- src/
-|   +-- app/                         <-- Pages (Next.js App Router)
-|   +-- components/
-|   |   +-- ui/                      <-- shadcn/ui components (35+ installed)
-|   +-- hooks/                       <-- Custom React hooks
-|   +-- lib/                         <-- Utilities
-+-- public/                          <-- Static files
+|       +-- error-tracking.md            Sentry for Laravel (5 min)
+|       +-- security-headers.md          SecurityHeaders middleware
+|       +-- performance.md               Lighthouse, caching, optimization
+|       +-- database-optimization.md     Indexing, N+1, Eloquent caching
+|       +-- rate-limiting.md             Laravel throttle middleware
++-- app/
+|   +-- Http/Controllers/            <-- MVC Controllers
+|   +-- Http/Requests/               <-- Form Request classes
+|   +-- Models/                      <-- Eloquent Models
+|   +-- Policies/                    <-- Authorization Policies
++-- resources/
+|   +-- views/                       <-- Blade templates
+|   |   +-- components/              <-- Reusable Blade components
+|   +-- js/                          <-- Alpine.js
+|   +-- css/                         <-- Tailwind CSS
++-- routes/
+|   +-- web.php                      <-- Web routes
+|   +-- api.php                      <-- API routes
++-- database/
+|   +-- migrations/                  <-- Schema migrations
+|   +-- factories/                   <-- Model factories
++-- tests/
+|   +-- Feature/                     <-- Pest Feature tests
+|   +-- Unit/                        <-- Pest Unit tests
++-- .env.example                     <-- Environment variable template
 ```
-
----
-
-## Getting Started
-
-### 1. Initialize the Project
-
-Run `/init` with a brief description of your idea. The skill interviews you one question at a time and fills out `docs/PRD.md` with your vision, target users, and a prioritized feature map.
-
-### 2. Spec Your First Feature
-
-Run `/write-spec PROJ-1`. The skill interviews you in depth about this single feature and creates a complete spec in `features/PROJ-1-name.md` — user stories, acceptance criteria, edge cases. Then suggest running `/architecture` as the next step.
-
-### 3. Add shadcn/ui Components (as needed)
-
-35+ components are pre-installed. Add more as needed:
-```bash
-npx shadcn@latest add [component-name]
-```
-
-### 4. Production Setup (first deployment)
-
-When you're ready to deploy, the `/deploy` skill guides you through:
-- Vercel setup and deployment
-- Error tracking with Sentry
-- Security headers configuration
-- Performance monitoring with Lighthouse
-
-See `docs/production/` for detailed setup guides.
 
 ---
 
@@ -226,7 +238,7 @@ Each skill is a structured workflow that Claude Code discovers automatically. Sk
 | `/refine` | Inline | Needs live interview with user |
 | `/architecture` | Inline | Short output, user reviews in real-time |
 | `/frontend` | Sub-agent (forked) | Heavy file editing, lots of output |
-| `/backend` | Sub-agent (forked) | Heavy file editing, SQL, API code |
+| `/backend` | Sub-agent (forked) | Heavy file editing, migrations, controllers |
 | `/qa` | Sub-agent (forked) | Systematic testing, lots of output |
 | `/deploy` | Inline | Deployment needs user oversight |
 | `/help` | Inline | Quick status check and guidance |
@@ -244,15 +256,13 @@ Auto-loaded at every session start. Contains tech stack, conventions, and refere
 
 ## Context Engineering
 
-AI agents work best with clean, structured context - not longer prompts. This template is designed around these principles:
+AI agents work best with clean, structured context — not longer prompts. This template is designed around these principles:
 
 ### State lives in files, not in memory
 
-Every skill reads `features/INDEX.md` and the relevant feature spec at start. After context compaction or a new session, nothing is lost - the agent simply re-reads the files. Progress tracking, acceptance criteria, and tech designs all live in markdown files, not in the conversation.
+Every skill reads `features/INDEX.md` and the relevant feature spec at start. After context compaction or a new session, nothing is lost — the agent simply re-reads the files.
 
 ### Context is layered
-
-Not everything is loaded at once. Information is layered by relevance:
 
 | Layer | What | When loaded |
 |-------|------|-------------|
@@ -264,27 +274,23 @@ Not everything is loaded at once. Information is layered by relevance:
 
 ### Context is isolated
 
-Heavy implementation skills (`/frontend`, `/backend`, `/qa`) run as **forked sub-agents** with their own context window. Research noise from one skill doesn't pollute another. Each fork starts clean and loads only what it needs.
+Heavy implementation skills (`/frontend`, `/backend`, `/qa`) run as **forked sub-agents** with their own context window. Each fork starts clean and loads only what it needs.
 
 ### Context recovery is built in
 
-All forked skills include a **Context Recovery** section: if the context is compacted mid-task, the agent re-reads the feature spec, checks `git diff` for progress, and continues without restarting or duplicating work.
-
-### Always read, never guess
-
-A global rule (`rules/general.md`) enforces: always read a file before modifying it, never assume contents from memory, verify import paths and API routes by reading. This prevents hallucinated code references - the most common source of AI coding errors.
+All forked skills include a **Context Recovery** section: if the context is compacted mid-task, the agent re-reads the feature spec, checks `git diff` for progress, and continues without restarting.
 
 ---
 
 ## Customization for Your Team
 
-This template is designed as a starting point. Customize it for your team:
+This template is a starting point. Customize it for your project:
 
-1. **Edit CLAUDE.md** - Add your project-specific conventions and build commands
-2. **Edit docs/PRD.md** - Define your product vision and roadmap
-3. **Edit .claude/rules/** - Adjust coding standards for your team
-4. **Edit .claude/skills/** - Modify workflows to match your process
-5. **Edit .claude/settings.json** - Configure team permissions
+1. **Edit CLAUDE.md** — Add project-specific conventions
+2. **Edit docs/PRD.md** — Define your product vision and roadmap
+3. **Edit .claude/rules/** — Adjust coding standards for your team
+4. **Edit .claude/skills/** — Modify workflows to match your process
+5. **Edit .claude/settings.json** — Configure team permissions
 
 ---
 
@@ -294,37 +300,35 @@ Standalone guides in `docs/production/`:
 
 | Guide | Setup Time | What It Does |
 |-------|-----------|-------------|
-| [Error Tracking](docs/production/error-tracking.md) | 5 min | Sentry integration for automatic error capture |
-| [Security Headers](docs/production/security-headers.md) | 2 min | XSS, Clickjacking, MIME sniffing protection |
-| [Performance](docs/production/performance.md) | 10 min | Lighthouse checks, image optimization, caching |
-| [Database Optimization](docs/production/database-optimization.md) | 15 min | Indexing, N+1 prevention, query optimization |
-| [Rate Limiting](docs/production/rate-limiting.md) | 10 min | Upstash Redis for API abuse prevention |
+| [Error Tracking](docs/production/error-tracking.md) | 5 min | Sentry for Laravel — automatic error capture |
+| [Security Headers](docs/production/security-headers.md) | 2 min | SecurityHeaders middleware (XSS, Clickjacking) |
+| [Performance](docs/production/performance.md) | 10 min | Lighthouse, caching, Eloquent optimization |
+| [Database Optimization](docs/production/database-optimization.md) | 15 min | Indexing, N+1 prevention, query caching |
+| [Rate Limiting](docs/production/rate-limiting.md) | 5 min | Laravel throttle middleware |
 
 ---
 
 ## Scripts
 
 ```bash
-npm run dev          # Development server (localhost:3000)
-npm run build        # Production build
-npm run start        # Production server
-npm run lint         # ESLint
-npm test             # Vitest: integration tests for API routes
-npm run test:e2e     # Playwright: E2E tests for user flows
-npm run test:all     # Run both test suites
+# Laravel
+php artisan serve          # Development server (localhost:8000)
+php artisan migrate        # Run pending migrations
+php artisan test           # Run Pest test suite
+php artisan route:list     # List all registered routes
+
+# Assets (Vite)
+npm run dev                # Asset dev server (hot reload)
+npm run build              # Production asset build
+
+# Laravel Sail (Docker)
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm run dev
 ```
-
----
-
-## Author
-
-Created by **Alex Sprogis** – AI Product Engineer & Content Creator.
-
-- [YouTube](https://www.youtube.com/@alex.sprogis)
-- [Website](https://alexsprogis.de)
 
 ---
 
 ## License
 
-MIT License - feel free to use for your projects!
+MIT License — feel free to use for your projects!

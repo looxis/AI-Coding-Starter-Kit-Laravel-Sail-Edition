@@ -1,101 +1,71 @@
 # Rate Limiting
 
-Prevent abuse, DDoS attacks, and excessive API usage.
+Prevent abuse, brute-force attacks, and excessive API usage.
 
 ## When to Add Rate Limiting
 - **MVP:** Optional (focus on features first)
 - **Production with users:** Recommended on auth endpoints and public APIs
 - **Public-facing APIs:** Required
 
-## Setup with Upstash Redis
+## Laravel's Built-in Rate Limiting (no external service needed)
 
-### 1. Install Dependencies
-```bash
-npm install @upstash/ratelimit @upstash/redis
+### 1. Apply to Routes
+In `routes/web.php` or `routes/api.php`:
+```php
+// Limit to 60 requests per minute per user/IP
+Route::middleware(['auth', 'throttle:60,1'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+});
+
+// Stricter limit for auth endpoints
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'store']);
+    Route::post('/forgot-password', [PasswordController::class, 'store']);
+});
 ```
 
-### 2. Create Upstash Account
-- Go to [upstash.com](https://upstash.com) (free tier: 10k requests/day)
-- Create a Redis database
-- Copy REST URL and token
+### 2. Custom Rate Limiters
+For more control, define named rate limiters in `app/Providers/AppServiceProvider.php` or `RouteServiceProvider.php`:
+```php
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Request;
 
-### 3. Add Environment Variables
-```bash
-# .env.local
-UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
-UPSTASH_REDIS_REST_TOKEN=xxx
+RateLimiter::for('api', function (Request $request) {
+    return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+});
+
+RateLimiter::for('uploads', function (Request $request) {
+    return Limit::perMinute(5)->by($request->user()->id);
+});
 ```
 
-### 4. Create Rate Limiter
-```typescript
-// src/lib/rate-limit.ts
-import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
-
-export const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10 seconds
-})
+Then apply:
+```php
+Route::middleware('throttle:uploads')->post('/upload', ...);
 ```
 
-### 5. Use in API Routes
-```typescript
-// src/app/api/example/route.ts
-import { ratelimit } from '@/lib/rate-limit'
-import { NextRequest, NextResponse } from 'next/server'
-
-export async function POST(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
-  const { success, limit, remaining } = await ratelimit.limit(ip)
-
-  if (!success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      {
-        status: 429,
-        headers: {
-          'X-RateLimit-Limit': limit.toString(),
-          'X-RateLimit-Remaining': remaining.toString(),
-        },
-      }
-    )
-  }
-
-  // Process request normally...
-}
-```
-
-### 6. Use in Middleware (Global)
-```typescript
-// middleware.ts
-import { ratelimit } from '@/lib/rate-limit'
-import { NextRequest, NextResponse } from 'next/server'
-
-export async function middleware(request: NextRequest) {
-  // Only rate limit API routes
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
-    const { success } = await ratelimit.limit(ip)
-
-    if (!success) {
-      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
-    }
-  }
-}
-
-export const config = {
-  matcher: '/api/:path*',
-}
-```
+### 3. Response When Limit Exceeded
+Laravel automatically returns HTTP 429 Too Many Requests with `Retry-After` header when the limit is exceeded. No additional code needed.
 
 ## Recommended Limits
 
 | Endpoint Type | Limit | Window |
 |--------------|-------|--------|
-| Login/Register | 5 requests | 1 minute |
+| Login / Register | 5 requests | 1 minute |
 | Password Reset | 3 requests | 5 minutes |
-| General API | 30 requests | 10 seconds |
 | File Upload | 5 requests | 1 minute |
+| General Web Routes | 60 requests | 1 minute |
+| Public API | 30 requests | 1 minute |
 
-## Alternative
-**Vercel Edge Config** - Simpler but less flexible. Built into Vercel, no external service needed.
+## Redis-Backed Rate Limiting (higher scale)
+
+By default, Laravel stores rate limit counters in the cache driver (database or file). For high-traffic production apps, switch to Redis:
+
+1. Install Redis client: `composer require predis/predis`
+2. Update `.env`:
+   ```
+   CACHE_STORE=redis
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   ```
+3. With Laravel Sail, Redis is already included in `docker-compose.yml`

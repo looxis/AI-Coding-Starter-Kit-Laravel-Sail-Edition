@@ -25,8 +25,8 @@ Before starting ANY work, check if the project has been initialized:
 - Commit format: `type(PROJ-X): description`
 - Types: feat, fix, refactor, test, docs, deploy, chore
 - Check existing features before creating new ones: `ls features/ | grep PROJ-`
-- Check existing components before building: `git ls-files src/components/`
-- Check existing APIs before building: `git ls-files src/app/api/`
+- Check existing components before building: `git ls-files resources/views/components/`
+- Check existing controllers/routes before building: `git ls-files app/Http/Controllers/ routes/`
 
 ## Human-in-the-Loop
 - Always ask for user approval before finalizing deliverables

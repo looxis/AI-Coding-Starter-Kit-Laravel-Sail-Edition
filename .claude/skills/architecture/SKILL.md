@@ -22,8 +22,8 @@ NEVER write code or show implementation details:
 2. Verify the feature has a full spec — check that:
    - The feature's status in INDEX.md is **"Planned"** (not "Roadmap")
    - A spec file `features/PROJ-X-*.md` actually exists on disk
-3. Check existing components: `git ls-files src/components/`
-4. Check existing APIs: `git ls-files src/app/api/`
+3. Check existing components: `git ls-files resources/views/components/`
+4. Check existing controllers/routes: `git ls-files app/Http/Controllers/ routes/`
 5. Read the feature spec the user references
 
 **If the feature status is "Roadmap" or no spec file exists:**
@@ -74,6 +74,12 @@ Stored in: Browser localStorage (no server needed)
 #### C) Tech Decisions (justified for PM)
 Explain WHY specific tools/approaches are chosen in plain language.
 
+Examples of decisions to document:
+- Route type: web route (returns Blade view) vs API route (returns JSON)
+- Authorization approach: Policy (model-level) vs Gate (action-level) vs middleware (route-level)
+- Frontend interactivity: full server-render vs Alpine.js component
+- Storage approach: which database table, relationships, and indexes needed
+
 #### D) Dependencies (packages to install)
 List only package names with brief purpose.
 
@@ -91,7 +97,8 @@ For every meaningful technical choice made during this session, add an entry to 
 **Format:**
 ```
 | Decision | Rationale | Date |
-| localStorage over Supabase | No user accounts needed; data is device-local | 2026-05-19 |
+| Web route over API route | Feature returns a full Blade view, no JSON client needed | 2026-05-19 |
+| Policy over Gate | Resource-level authorization on Todo model, reusable across controllers | 2026-05-19 |
 ```
 
 If any questions came up during the design that couldn't be resolved, add them to the **Open Questions** section as `- [ ]` items.

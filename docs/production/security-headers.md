@@ -4,40 +4,45 @@ Protect against XSS, Clickjacking, MIME sniffing, and other common web attacks.
 
 ## Setup
 
-Add security headers to `next.config.ts`:
+### 1. Create the Middleware
+```bash
+php artisan make:middleware SecurityHeaders
+```
 
-```typescript
-import type { NextConfig } from 'next'
+### 2. Implement the Middleware
+In `app/Http/Middleware/SecurityHeaders.php`:
+```php
+<?php
 
-const nextConfig: NextConfig = {
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
-          },
-        ],
-      },
-    ]
-  },
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class SecurityHeaders
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $response = $next($request);
+
+        $response->headers->set('X-Frame-Options', 'DENY');
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('Referrer-Policy', 'origin-when-cross-origin');
+        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
+        return $response;
+    }
 }
+```
 
-export default nextConfig
+### 3. Register the Middleware
+In `app/Http/Kernel.php`, add to the `$middleware` array (applies globally):
+```php
+protected $middleware = [
+    // ... existing middleware
+    \App\Http\Middleware\SecurityHeaders::class,
+];
 ```
 
 ## What Each Header Does
@@ -57,8 +62,11 @@ export default nextConfig
 5. Verify all 4 headers are present
 
 ## Advanced (Optional)
-**Content-Security-Policy (CSP)** - The most powerful header, but can break your app if misconfigured. Only add after thorough testing:
-```
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'
+**Content-Security-Policy (CSP)** — The most powerful header, but can break your app if misconfigured. Only add after thorough testing:
+```php
+$response->headers->set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline'"
+);
 ```
 Start with report-only mode first: `Content-Security-Policy-Report-Only`

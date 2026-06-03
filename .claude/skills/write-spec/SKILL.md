@@ -22,8 +22,8 @@ Interview the user until you reach a **complete shared understanding** of the fe
 ## Before Starting
 1. Read `docs/PRD.md` — understand the project vision and target users
 2. Read `features/INDEX.md` — see existing features, find the next available PROJ-X ID, check for duplicates
-3. Check existing components: `git ls-files src/components/`
-4. Check existing APIs: `git ls-files src/app/api/`
+3. Check existing components: `git ls-files resources/views/components/`
+4. Check existing controllers/routes: `git ls-files app/Http/Controllers/ routes/`
 
 **If the project has not been initialized** (PRD is still the empty template):
 > "The project hasn't been set up yet. Run `/init` first to define the project vision and feature map."

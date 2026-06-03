@@ -29,9 +29,9 @@ Read these files to understand where the project stands:
    - Deployment section exists (added by /deploy)
 
 4. **Check Codebase:** Quick scan of what's been built
-   - `ls src/components/*.tsx 2>/dev/null` → Custom components
-   - `ls src/app/api/ 2>/dev/null` → API routes
-   - `ls src/components/ui/` → Installed shadcn components
+   - `git ls-files resources/views/components/ 2>/dev/null` → Blade components
+   - `git ls-files app/Http/Controllers/ 2>/dev/null` → Controllers
+   - `git ls-files routes/ 2>/dev/null` → Route files
 
 ### Step 2: Determine Next Action
 

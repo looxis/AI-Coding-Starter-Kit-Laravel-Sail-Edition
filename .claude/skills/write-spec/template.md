@@ -48,7 +48,7 @@
 <!-- Added by /architecture -->
 | Decision | Rationale | Date |
 |----------|-----------|------|
-| _Example: localStorage over Supabase_ | _No user accounts needed; data is device-local_ | YYYY-MM-DD |
+| _Example: Web route over API route_ | _Feature returns a full Blade view, no JSON client needed_ | YYYY-MM-DD |
 
 ---
 <!-- Sections below are added by subsequent skills -->

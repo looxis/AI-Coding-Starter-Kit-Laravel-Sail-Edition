@@ -11,57 +11,64 @@
 ## Common Performance Issues
 
 ### Unoptimized Images
-```tsx
-// Bad - unoptimized, no lazy loading
-<img src="/large-image.jpg" />
+```html
+<!-- Bad: no lazy loading, no sizing -->
+<img src="/large-image.jpg">
 
-// Good - Next.js Image component
-import Image from 'next/image'
-<Image src="/large-image.jpg" width={800} height={600} alt="Description" />
+<!-- Good: lazy loading, explicit dimensions -->
+<img src="/large-image.jpg" width="800" height="600" loading="lazy" alt="Description">
 ```
-Next.js Image automatically: resizes, lazy-loads, serves WebP format.
+For advanced image handling (resizing, WebP conversion), use **Spatie Media Library**: `composer require spatie/laravel-medialibrary`
 
 ### Large JavaScript Bundle
-Use dynamic imports for heavy components that aren't needed on initial load:
-```tsx
-import dynamic from 'next/dynamic'
-
-const HeavyChart = dynamic(() => import('./HeavyChart'), {
-  loading: () => <p>Loading chart...</p>,
-})
-```
+Use dynamic Alpine.js imports for heavy components that aren't needed on initial load.
+Split Vite entrypoints in `vite.config.js` for code-splitting.
 
 ### Missing Loading States
-Always show feedback during data fetching:
-```tsx
-// Use shadcn Skeleton component
-import { Skeleton } from "@/components/ui/skeleton"
-
-if (isLoading) return <Skeleton className="h-12 w-full" />
+Show Alpine.js feedback during data fetching or form submission:
+```html
+<div x-data="{ loading: false }">
+    <button @click="loading = true" :disabled="loading">
+        <span x-show="loading">Saving...</span>
+        <span x-show="!loading">Save</span>
+    </button>
+</div>
 ```
 
 ### No Caching Strategy
-Cache slow database queries with `unstable_cache`:
-```typescript
-import { unstable_cache } from 'next/cache'
+Cache slow database queries with Laravel Cache:
+```php
+$stats = Cache::remember('dashboard-stats', 3600, function () {
+    return DB::table('stats')->get();
+});
+```
 
-export const getStats = unstable_cache(
-  async () => {
-    const { data } = await supabase.from('stats').select('*')
-    return data
-  },
-  ['dashboard-stats'],
-  { revalidate: 3600 } // Refresh every hour
-)
+## Laravel-Specific Optimizations
+
+**Cache configuration (production only):**
+```bash
+php artisan config:cache   # Merges config into single file
+php artisan route:cache    # Caches route registration (no closures allowed)
+php artisan view:cache     # Pre-compiles all Blade templates
+```
+Never run these in development — they bypass real-time file changes.
+
+**Opcache** — Enable in your PHP server config (`opcache.enable=1`). Caches compiled PHP bytecode, massively speeds up repeated requests.
+
+**Eloquent optimization:**
+```php
+// Use select() to fetch only needed columns
+User::select(['id', 'name', 'email'])->get();
+
+// Use chunk() for processing large datasets
+User::chunk(200, function ($users) {
+    // process batch
+});
 ```
 
 ## Quick Wins Checklist
-- [ ] All images use `next/image` component
-- [ ] Heavy components use dynamic imports
-- [ ] Loading states show skeleton/spinner
-- [ ] Fonts loaded with `next/font`
-- [ ] No unnecessary client-side JavaScript (`"use client"` only when needed)
-
-## Automated Monitoring
-- **Vercel Analytics** - Automatic on Pro plan, shows Core Web Vitals
-- **Vercel Speed Insights** - Real user performance data
+- [ ] Images use `loading="lazy"` attribute
+- [ ] Alpine.js shows loading feedback during async operations
+- [ ] `php artisan config:cache` and `route:cache` run in production
+- [ ] Eager loading (`with()`) used everywhere relationships are accessed
+- [ ] No unbounded queries (all list queries use `->paginate()` or `->limit()`)

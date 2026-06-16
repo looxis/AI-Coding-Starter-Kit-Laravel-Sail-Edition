@@ -1,7 +1,7 @@
 {
-  "name": "ai-coding-starter-kit",
+  "name": "laravel-sail-starter-kit",
   "version": "1.0.0",
-  "description": "AI Coding Starter Kit with AI Agent Team System for Claude Code — Laravel edition",
+  "description": "AI Coding Starter Kit — Laravel Sail Edition (Laravel + Sail/Docker + WSL2 + Blade + Tailwind + Alpine).",
   "private": true,
   "scripts": {
     "dev": "vite",

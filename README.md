@@ -1,82 +1,124 @@
-# AI Coding Starter Kit — Laravel Edition
+# AI Coding Starter Kit — Laravel Sail Edition
 
-> Build production-ready Laravel apps faster with AI-powered Skills handling Requirements, Architecture, Development, QA, and Deployment.
+> Build production-ready Laravel apps faster with AI-powered Skills handling Requirements, Architecture, Development, QA, and Deployment — running entirely on Docker + Laravel Sail inside WSL2.
 
-This template uses [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with modern Skills, Rules, and Sub-Agents to provide a complete AI-powered development workflow — adapted for the **Laravel / Blade / Tailwind / Alpine.js / MySQL / Pest** stack.
+Dieses Template nutzt [Claude Code](https://docs.anthropic.com/en/docs/claude-code) mit Skills, Rules und Sub-Agents für einen kompletten AI-unterstützten Entwicklungsworkflow — zugeschnitten auf den **Laravel / Blade / Tailwind / Alpine.js / MySQL / Pest**-Stack, lokal ausschließlich über **Docker + Laravel Sail + WSL2** betrieben. Siehe [AI-Powered Development Workflow](#ai-powered-development-workflow) unten.
 
-## Quick Start
+## Technischer Stack
 
-### Option A: Laravel Herd (recommended for Windows/Mac)
+| Category | Tool | Why? |
+|----------|------|------|
+| **Framework** | Laravel (PHP 8.3) | Full-stack MVC, batteries included |
+| **Templating** | Blade | Server-side templating mit Components |
+| **Styling** | Tailwind CSS v3 | Utility-first CSS |
+| **JS Framework** | Alpine.js | Leichtgewichtige Reaktivität, kein SPA-Overhead |
+| **Database** | MySQL (im Container) | Relationale Datenbank via Eloquent ORM |
+| **Validation** | Laravel Form Requests | Validation + Authorization in einer Klasse |
+| **Testing** | Laravel Pest | Ausdrucksstarkes PHP-Testing |
+| **Local Dev** | **Laravel Sail (Docker) — ausschließlich** | Containerisiert, kein lokales PHP/Composer/Node nötig |
+
+> **Laravel Herd wird für dieses Projekt nicht verwendet.** Die lokale Entwicklung läuft ausschließlich über Docker + Laravel Sail innerhalb von WSL2/Ubuntu.
+
+## Voraussetzungen
+
+- Windows 11
+- WSL2 mit Ubuntu (`wsl --install` bzw. vorhandene Ubuntu-Distribution)
+- Docker Desktop mit aktiviertem WSL2-Backend
+- Git
+- VS Code mit der Extension **Remote Development / WSL** (empfohlen)
+
+Alle Befehle unten werden **im WSL2-/Ubuntu-Terminal** ausgeführt — **nicht** in PowerShell oder CMD. Das Projekt sollte idealerweise im WSL-Dateisystem liegen (z. B. `~/code/your-project`), nicht unter `/mnt/c/Users/...`, da das deutlich performanter ist.
+
+## Installation unter Windows + WSL2
 
 ```bash
-# 1. Install Herd from herd.laravel.com — it manages PHP, MySQL, and local domains
-
-# 2. Clone into your Herd sites directory
-git clone https://github.com/YOUR_USERNAME/ai-coding-starter-kit.git ~/Herd/my-project
-cd ~/Herd/my-project
-
-# 3. Install PHP dependencies
-composer install
-
-# 4. Set up environment
+cd ~/code
+git clone https://github.com/looxis/laravel-sail-starter-kit.git your-project
+cd your-project
 cp .env.example .env
-php artisan key:generate
-
-# 5. Create a MySQL database and update .env with DB credentials
-# DB_DATABASE=my_project, DB_USERNAME=root, DB_PASSWORD=
-
-# 6. Run migrations
-php artisan migrate
-
-# 7. Install and build assets
-npm install && npm run dev
-
-# 8. Open http://my-project.test in your browser
 ```
 
-### Option B: Laravel Sail (Docker)
+Vor dem ersten `sail up` existiert `./vendor/bin/sail` noch nicht — die PHP-Abhängigkeiten werden daher einmalig über einen Wegwerf-Container installiert (kein lokales PHP/Composer nötig). Die App nutzt **PHP 8.3** — entsprechend wird das `php83-composer`-Image verwendet:
 
 ```bash
-# 1. Install Docker Desktop
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php83-composer:latest \
+    composer install --ignore-platform-reqs
+```
 
-# 2. Clone the repo
-git clone https://github.com/YOUR_USERNAME/ai-coding-starter-kit.git my-project
-cd my-project
+Danach läuft alles über Sail:
 
-# 3. Install PHP dependencies (needs PHP on host or use the Docker workaround)
-composer install
-
-# 4. Set up environment
-cp .env.example .env
-
-# 5. Start Docker containers
+```bash
 ./vendor/bin/sail up -d
-
-# 6. Generate app key and run migrations
 ./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail artisan migrate
-
-# 7. Build assets
-./vendor/bin/sail npm install && ./vendor/bin/sail npm run dev
-
-# 8. Open http://localhost in your browser
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
 ```
+
+Die App ist danach erreichbar unter **http://localhost**.
+
+## Ports
+
+Standardmäßig nutzt dieses Template die Sail-Standardports (siehe `.env.example`):
+
+| Service | Port |
+|---------|------|
+| Laravel (App) | `http://localhost` (Port `80`) |
+| Vite (Dev-Server) | `5173` |
+| MySQL (extern, z. B. für einen DB-Client) | `3306` |
+
+Falls mehrere Sail-Projekte parallel laufen sollen, in `.env` (und ggf. `.env.example`) `APP_PORT`, `VITE_PORT` und `FORWARD_DB_PORT` projektspezifisch anpassen — `compose.yaml` liest diese Werte bereits automatisch.
+
+## Täglicher Workflow
+
+```bash
+cd ~/code/your-project
+./vendor/bin/sail up -d
+./vendor/bin/sail npm run dev
+```
+
+Stoppen:
+
+```bash
+./vendor/bin/sail down
+```
+
+## Nützliche Sail-Befehle
+
+```bash
+./vendor/bin/sail artisan <befehl>
+./vendor/bin/sail composer <befehl>
+./vendor/bin/sail npm <befehl>
+./vendor/bin/sail pest
+./vendor/bin/sail shell
+./vendor/bin/sail logs
+```
+
+---
+
+## AI-Powered Development Workflow
+
+Dieses Repo basiert auf dem AI Coding Starter Kit (Laravel Edition) und nutzt Claude Code Skills, um Requirements, Architecture, Frontend, Backend, QA und Deployment strukturiert zu begleiten.
 
 ### Initialize Your Project
 
-Open Claude Code and run `/init` with a brief description of your idea:
+Falls `docs/PRD.md` noch ein leeres Template ist, starte mit `/init` und einer kurzen Beschreibung deiner Idee:
 
 ```
 /init I want to build a project management tool for small teams
 where users can create projects, assign tasks, and track progress.
 ```
 
-The skill interviews you one question at a time (**Grill Me** principle — always with a recommended answer you just confirm or correct) until there's a shared understanding. It then:
-1. Creates your **Product Requirements Document** (`docs/PRD.md`)
-2. Breaks the project into a prioritized feature map (P0/P1/P2)
-3. Decides on authentication and local dev setup
-4. Updates **feature tracking** (`features/INDEX.md`)
-5. Recommends which feature to build first
+Die Skill interviewt dich Schritt für Schritt (**Grill Me**-Prinzip — immer mit einer Empfehlung, die du bestätigst oder korrigierst), bis ein gemeinsames Verständnis besteht. Danach:
+1. Erstellt sie dein **Product Requirements Document** (`docs/PRD.md`)
+2. Bricht das Projekt in eine priorisierte Feature-Map herunter (P0/P1/P2)
+3. Entscheidet über Auth und lokales Dev-Setup
+4. Aktualisiert das **Feature Tracking** (`features/INDEX.md`)
+5. Empfiehlt das erste zu bauende Feature
 
 ### Spec Your First Feature
 
@@ -84,21 +126,19 @@ The skill interviews you one question at a time (**Grill Me** principle — alwa
 /write-spec PROJ-1
 ```
 
-The skill interviews you about this single feature in depth — user stories, edge cases, acceptance criteria in German Angenommen/Wenn/Dann format. Use `/refine PROJ-X` at any point to revisit and improve.
+Die Skill interviewt dich im Detail zu genau diesem Feature — User Stories, Edge Cases, Acceptance Criteria im deutschen Angenommen/Wenn/Dann-Format. Mit `/refine PROJ-X` kannst du einen bestehenden Spec jederzeit weiter verfeinern.
 
 ### Build Features
 
 ```
-/architecture    Design the tech approach for features/PROJ-1-user-auth.md
-/frontend        Build the Blade UI for features/PROJ-1-user-auth.md
-/backend         Build controllers, models, migrations for features/PROJ-1-user-auth.md
-/qa              Test features/PROJ-1-user-auth.md
+/architecture    Design the tech approach for features/PROJ-1-....md
+/frontend        Build the Blade UI for features/PROJ-1-....md
+/backend         Build controllers, models, migrations for features/PROJ-1-....md
+/qa              Test features/PROJ-1-....md
 /deploy          Deploy to production
 ```
 
-Each skill suggests the next step when it finishes. Handoffs are always user-initiated.
-
----
+Jede Skill schlägt am Ende den nächsten Schritt vor. Handoffs erfolgen immer durch den Nutzer.
 
 ## Available Skills
 
@@ -111,7 +151,7 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 | Frontend Developer | `/frontend` | Builds UI with Blade templates, Alpine.js, and Tailwind CSS |
 | Backend Developer | `/backend` | Builds controllers, Eloquent models, migrations, Form Requests |
 | QA Engineer | `/qa` | Tests features against acceptance criteria + writes Pest tests + security audit |
-| DevOps | `/deploy` | Sets up Herd/Sail locally and guides through production deployment |
+| DevOps | `/deploy` | Guides through (local) deployment checks |
 | Help | `/help` | Context-aware guide: shows where you are and what to do next |
 
 ### How Skills Work
@@ -138,78 +178,33 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 
 ### Feature Tracking
 
-Features are tracked in `features/INDEX.md`:
-
-| ID | Feature | Status | Spec |
-|----|---------|--------|------|
-| PROJ-1 | User Login | Deployed | [Spec](features/PROJ-1-user-login.md) |
-| PROJ-2 | Dashboard | In Progress | [Spec](features/PROJ-2-dashboard.md) |
-
-Every skill reads this file at start and updates it when done, preventing duplicate work.
-
----
-
-## Tech Stack
-
-| Category | Tool | Why? |
-|----------|------|------|
-| **Framework** | Laravel (PHP) | Full-stack MVC, batteries included |
-| **Templating** | Blade | Server-side templating with reusable components |
-| **Styling** | Tailwind CSS v3 | Utility-first CSS |
-| **JS Framework** | Alpine.js | Lightweight reactive behavior, no SPA overhead |
-| **Database** | MySQL | Relational database via Eloquent ORM |
-| **Validation** | Laravel Form Requests | Validation + authorization in one class |
-| **Testing** | Laravel Pest | Expressive PHP testing |
-| **Local Dev** | Laravel Herd / Sail | Native (Herd) or Docker (Sail) |
+Features sind in `features/INDEX.md` getrackt. Jede Skill liest diese Datei bei Start und aktualisiert sie nach Abschluss, um Doppelarbeit zu vermeiden.
 
 ---
 
 ## Project Structure
 
 ```
-ai-coding-starter-kit/
+your-project/
 +-- CLAUDE.md                        <-- Auto-loaded project context
++-- compose.yaml                     <-- Sail/Docker services (app + mysql)
 +-- .claude/
 |   +-- settings.json                <-- Team permissions (committed)
 |   +-- settings.local.json          <-- Personal overrides (gitignored)
 |   +-- rules/                       <-- Auto-applied coding rules
-|   |   +-- general.md                   Git workflow, feature tracking
-|   |   +-- frontend.md                  Blade components, Alpine.js, CSRF
-|   |   +-- backend.md                   Form Requests, Eloquent, Policies
-|   |   +-- security.md                  Secrets, CSRF, auth, headers
 |   +-- skills/                      <-- Invocable workflows (/command)
-|   |   +-- init/SKILL.md                /init
-|   |   +-- write-spec/SKILL.md          /write-spec
-|   |   +-- refine/SKILL.md              /refine
-|   |   +-- architecture/SKILL.md        /architecture
-|   |   +-- frontend/SKILL.md            /frontend (runs as sub-agent)
-|   |   +-- backend/SKILL.md             /backend (runs as sub-agent)
-|   |   +-- qa/SKILL.md                  /qa (runs as sub-agent)
-|   |   +-- deploy/SKILL.md              /deploy
-|   |   +-- help/SKILL.md                /help
 |   +-- agents/                      <-- Sub-agent configs
-|       +-- frontend-dev.md              Model, tools, limits
-|       +-- backend-dev.md
-|       +-- qa-engineer.md
 +-- features/                        <-- Feature specifications
 |   +-- INDEX.md                         Status tracking
-|   +-- README.md                        Spec format documentation
 +-- docs/
 |   +-- PRD.md                       <-- Product Requirements Document
 |   +-- production/                  <-- Production setup guides
-|       +-- error-tracking.md            Sentry for Laravel (5 min)
-|       +-- security-headers.md          SecurityHeaders middleware
-|       +-- performance.md               Lighthouse, caching, optimization
-|       +-- database-optimization.md     Indexing, N+1, Eloquent caching
-|       +-- rate-limiting.md             Laravel throttle middleware
 +-- app/
 |   +-- Http/Controllers/            <-- MVC Controllers
 |   +-- Http/Requests/               <-- Form Request classes
 |   +-- Models/                      <-- Eloquent Models
-|   +-- Policies/                    <-- Authorization Policies
 +-- resources/
 |   +-- views/                       <-- Blade templates
-|   |   +-- components/              <-- Reusable Blade components
 |   +-- js/                          <-- Alpine.js
 |   +-- css/                         <-- Tailwind CSS
 +-- routes/
@@ -221,7 +216,7 @@ ai-coding-starter-kit/
 +-- tests/
 |   +-- Feature/                     <-- Pest Feature tests
 |   +-- Unit/                        <-- Pest Unit tests
-+-- .env.example                     <-- Environment variable template
++-- .env.example                     <-- Environment variable template (Sail-Ports, DB)
 ```
 
 ---
@@ -265,7 +260,7 @@ Every skill reads `features/INDEX.md` and the relevant feature spec at start. Af
 ### Context is layered
 
 | Layer | What | When loaded |
-|-------|------|-------------|
+|-------|------|--------------|
 | `CLAUDE.md` | Tech stack, conventions, commands | Every session (auto) |
 | `.claude/rules/` | Coding standards | When editing matching files (auto) |
 | Skill `SKILL.md` | Workflow instructions | When skill is invoked |
@@ -283,8 +278,6 @@ All forked skills include a **Context Recovery** section: if the context is comp
 ---
 
 ## Customization for Your Team
-
-This template is a starting point. Customize it for your project:
 
 1. **Edit CLAUDE.md** — Add project-specific conventions
 2. **Edit docs/PRD.md** — Define your product vision and roadmap
@@ -311,20 +304,13 @@ Standalone guides in `docs/production/`:
 ## Scripts
 
 ```bash
-# Laravel
-php artisan serve          # Development server (localhost:8000)
-php artisan migrate        # Run pending migrations
-php artisan test           # Run Pest test suite
-php artisan route:list     # List all registered routes
-
-# Assets (Vite)
-npm run dev                # Asset dev server (hot reload)
-npm run build              # Production asset build
-
-# Laravel Sail (Docker)
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail npm run dev
+./vendor/bin/sail up -d            # Container starten
+./vendor/bin/sail down             # Container stoppen
+./vendor/bin/sail artisan migrate  # Migrationen ausführen
+./vendor/bin/sail pest             # Pest-Testsuite ausführen
+./vendor/bin/sail artisan route:list  # Alle Routen anzeigen
+./vendor/bin/sail npm run dev      # Vite Dev-Server (Hot Reload)
+./vendor/bin/sail npm run build    # Production-Asset-Build
 ```
 
 ---

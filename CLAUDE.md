@@ -13,7 +13,7 @@
 | **Database** | MySQL | Relational database, managed by Eloquent ORM |
 | **Validation** | Laravel Form Requests | Request validation + authorization in one class |
 | **Testing** | Laravel Pest | Expressive PHP testing framework |
-| **Local Dev** | Laravel Herd or Laravel Sail (Docker) | Native (Herd) or Docker (Sail) |
+| **Local Dev** | Laravel Sail (Docker), PHP 8.3 | Containerized, no local PHP/Composer/Node needed |
 
 ## Project Structure
 
@@ -45,9 +45,18 @@ tests/
   Unit/               # Pest unit tests (isolated logic)
 config/               # Laravel config files
 storage/              # Logs, cache, file uploads
-.env.example          # Environment variable template
-docker-compose.yml    # Laravel Sail config (if using Docker)
+.env.example          # Environment variable template (Sail ports, DB config)
+compose.yaml          # Laravel Sail / Docker services (app + mysql)
 ```
+
+## Local Development (Docker / Sail only)
+
+- This project runs **exclusively via Docker + Laravel Sail** — no local PHP, Composer, or Node installation is assumed or required.
+- **Laravel Herd is not used for this project.**
+- On Windows, all development happens inside **WSL2/Ubuntu** — never directly in PowerShell or CMD. Ideally the repo lives in the WSL filesystem (e.g. `~/code/your-project`), not under `/mnt/c/Users/...`.
+- Always run project commands through `./vendor/bin/sail ...` (artisan, composer, npm, pest) rather than bare `php`/`composer`/`npm`.
+- Ports default to Sail's standard values (`APP_PORT=80`, `VITE_PORT=5173`, `FORWARD_DB_PORT=3306`). If multiple Sail projects run in parallel, override these in `.env`/`.env.example` to avoid collisions — see README for details.
+- Feature development should only start once `/init` has defined the actual product (`docs/PRD.md`) and this base Sail installation is documented and runnable.
 
 ## Development Workflow
 
@@ -57,7 +66,7 @@ docker-compose.yml    # Laravel Sail config (if using Docker)
 4. `/frontend` — Build UI with Blade templates and Alpine.js
 5. `/backend` — Build controllers, Eloquent models, migrations, Form Requests
 6. `/qa` — Test against acceptance criteria + security audit + Pest tests
-7. `/deploy` — Set up Herd/Sail locally, production-ready checks
+7. `/deploy` — Set up Sail locally, production-ready checks
 
 Use `/refine PROJ-X` at any point to revisit and improve an existing feature spec.
 
@@ -78,28 +87,27 @@ All features tracked in `features/INDEX.md`. Every skill reads it at start and u
 
 ## Build & Test Commands
 
+All commands run through Sail (no local PHP/Composer/Node):
+
 ```bash
+# Containers
+./vendor/bin/sail up -d
+./vendor/bin/sail down
+
 # Development
-php artisan serve          # Dev server (localhost:8000)
-php artisan migrate        # Run pending migrations
-php artisan make:model X -mf  # Create model, migration, factory
-php artisan make:request StoreXRequest  # Create Form Request
-php artisan make:policy XPolicy --model=X  # Create Policy
-php artisan route:list     # Show all registered routes
+./vendor/bin/sail artisan migrate           # Run pending migrations
+./vendor/bin/sail artisan make:model X -mf  # Create model, migration, factory
+./vendor/bin/sail artisan make:request StoreXRequest  # Create Form Request
+./vendor/bin/sail artisan make:policy XPolicy --model=X  # Create Policy
+./vendor/bin/sail artisan route:list        # Show all registered routes
 
 # Testing
-php artisan test           # Run all Pest tests
-./vendor/bin/pest          # Run Pest directly
-./vendor/bin/pest --filter=FeatureName  # Run specific test
+./vendor/bin/sail pest                      # Run all Pest tests
+./vendor/bin/sail pest --filter=FeatureName # Run specific test
 
 # Assets
-npm run dev                # Vite asset dev server
-npm run build              # Production asset build
-
-# With Laravel Sail (Docker)
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail npm run dev
+./vendor/bin/sail npm run dev               # Vite asset dev server
+./vendor/bin/sail npm run build             # Production asset build
 ```
 
 ## Product Context

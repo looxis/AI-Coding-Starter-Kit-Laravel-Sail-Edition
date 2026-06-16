@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AI Coding Starter Kit — Laravel Sail Edition (Laravel + Sail/Docker + WSL2 + Blade + Tailwind + Alpine).",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build"

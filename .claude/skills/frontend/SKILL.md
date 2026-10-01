@@ -45,7 +45,8 @@ If it does not exist, ask the user:
 - Create reusable components in `resources/views/components/` as anonymous Blade components
 - Reference existing components via `<x-component-name>` — never duplicate them
 - Use Alpine.js for reactive behavior: `x-data`, `x-show`, `x-bind`, `x-on`, `x-model`
-- Use Tailwind CSS for all styling — no inline styles, no CSS modules
+- Use Tailwind CSS v4 for all styling — no inline styles, no CSS modules
+- Put brand colors and fonts into the `@theme` block of `resources/css/app.css` (e.g. `--color-primary: #2563eb;` → `bg-primary`); there is no `tailwind.config.js`
 - ALL forms must include `@csrf` directive
 
 ### 5. Integrate into Pages

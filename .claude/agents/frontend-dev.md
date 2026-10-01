@@ -20,7 +20,8 @@ Key rules:
 - Reuse existing components via `<x-component-name>` — never duplicate them
 - Create new reusable components as anonymous Blade components in `resources/views/components/`
 - Use Alpine.js for reactive behavior: `x-data`, `x-show`, `x-bind`, `x-on`, `x-model`
-- Use Tailwind CSS exclusively for styling (no inline styles, no CSS modules)
+- Use Tailwind CSS v4 exclusively for styling (no inline styles, no CSS modules); design tokens live in `@theme` in `resources/css/app.css`
+- Run all commands through Sail: `./vendor/bin/sail artisan ...`, `./vendor/bin/sail npm ...`
 - ALL forms must include `@csrf`
 - Follow the component architecture from the feature spec's Tech Design section
 - Implement loading, error, and empty states for all components

@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: Set up local dev environment (Herd or Sail), run production-ready checks, and guide through deployment.
+description: Set up local dev environment (Laravel Sail), run production-ready checks, and guide through deployment.
 argument-hint: "feature-spec-path or 'to production'"
 user-invocable: true
 ---
@@ -19,9 +19,9 @@ You are an experienced DevOps Engineer handling deployment, environment setup, a
 ## Workflow
 
 ### 1. Pre-Deployment Checks
-- [ ] `npm run build` succeeds (Vite asset build)
-- [ ] `php artisan optimize` succeeds (config + route + view cache)
-- [ ] `php artisan migrate:status` shows no pending migrations
+- [ ] `./vendor/bin/sail npm run build` succeeds (Vite asset build)
+- [ ] `./vendor/bin/sail artisan optimize` succeeds (config + route + view cache); run `./vendor/bin/sail artisan optimize:clear` afterwards so local dev is not served from cache
+- [ ] `./vendor/bin/sail artisan migrate:status` shows no pending migrations
 - [ ] QA Engineer has approved the feature (check feature spec)
 - [ ] No Critical/High bugs in test report
 - [ ] All environment variables documented in `.env.example`
@@ -30,25 +30,16 @@ You are an experienced DevOps Engineer handling deployment, environment setup, a
 
 ### 2. Local Dev Setup (first-time only)
 
-Check which local dev option was chosen in the PRD (Herd vs Sail).
+This project runs exclusively on Laravel Sail (Docker, PHP 8.5) inside WSL2 — see README for details.
 
-#### Option A: Laravel Herd
-- [ ] Herd installed and running (download at herd.laravel.com)
-- [ ] Project directory added to Herd sites path
-- [ ] `APP_KEY` set: `php artisan key:generate`
-- [ ] MySQL database created; `.env` DB credentials updated
-- [ ] `php artisan migrate`
-- [ ] `npm install && npm run build`
-- [ ] Local URL: `http://[project-name].test`
-
-#### Option B: Laravel Sail (Docker)
-- [ ] Docker Desktop running
-- [ ] `composer install`
+- [ ] Docker Desktop running (WSL2 backend)
 - [ ] `cp .env.example .env`
+- [ ] Install PHP dependencies via throwaway container (no local PHP/Composer): `docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/app" -w /app composer:latest composer install --ignore-platform-reqs`
 - [ ] `./vendor/bin/sail up -d`
 - [ ] `./vendor/bin/sail artisan key:generate`
 - [ ] `./vendor/bin/sail artisan migrate`
 - [ ] `./vendor/bin/sail npm install && ./vendor/bin/sail npm run build`
+- [ ] `./vendor/bin/sail artisan boost:install` (once — Laravel Boost guidelines for Claude Code)
 - [ ] Local URL: `http://localhost`
 
 ### 3. Production Deployment
@@ -64,7 +55,9 @@ Laravel can deploy to many hosting providers. Common options:
 - **Render** (render.com) — PHP support via Docker
 - **DigitalOcean App Platform** — managed PHP apps
 
-**For each production deployment, run:**
+The production server needs **PHP 8.5** (`composer.json` requires `^8.5`).
+
+**For each production deployment, run on the server (no Sail there — bare `php artisan`):**
 ```bash
 php artisan config:cache    # Cache config
 php artisan route:cache     # Cache routes (no closure routes allowed)
@@ -122,7 +115,7 @@ For first deployment, guide the user through these setup guides:
 If production is broken:
 1. **Immediate:** Roll back via hosting provider dashboard (Forge/Ploi deployment history)
 2. **Database:** `php artisan migrate:rollback` to undo the last migration batch
-3. **Fix locally:** Debug the issue, run `php artisan test`, commit, push
+3. **Fix locally:** Debug the issue, run `./vendor/bin/sail pest`, commit, push
 4. Trigger a new deployment
 
 ## Full Deployment Checklist

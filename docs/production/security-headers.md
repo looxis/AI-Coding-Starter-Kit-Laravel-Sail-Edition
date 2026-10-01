@@ -6,7 +6,7 @@ Protect against XSS, Clickjacking, MIME sniffing, and other common web attacks.
 
 ### 1. Create the Middleware
 ```bash
-php artisan make:middleware SecurityHeaders
+./vendor/bin/sail artisan make:middleware SecurityHeaders
 ```
 
 ### 2. Implement the Middleware
@@ -37,12 +37,11 @@ class SecurityHeaders
 ```
 
 ### 3. Register the Middleware
-In `app/Http/Kernel.php`, add to the `$middleware` array (applies globally):
+In `bootstrap/app.php`, append it to the global middleware stack:
 ```php
-protected $middleware = [
-    // ... existing middleware
-    \App\Http\Middleware\SecurityHeaders::class,
-];
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+})
 ```
 
 ## What Each Header Does

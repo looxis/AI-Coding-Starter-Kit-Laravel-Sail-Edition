@@ -21,15 +21,8 @@
       "Edit(**/.ssh/**)"
     ],
     "allow": [
-      "Bash(composer install)",
-      "Bash(composer require:*)",
-      "Bash(composer update:*)",
-      "Bash(php artisan:*)",
       "Bash(./vendor/bin/sail:*)",
-      "Bash(./vendor/bin/pest:*)",
-      "Bash(npm install)",
-      "Bash(npm run dev:*)",
-      "Bash(npm run build:*)",
+      "mcp__laravel-boost",
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git tag:*)",

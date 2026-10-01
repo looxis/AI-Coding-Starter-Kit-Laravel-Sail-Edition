@@ -27,11 +27,11 @@ Before marking frontend as complete:
 ## Quality
 - [ ] Responsive: Mobile (375px), Tablet (768px), Desktop (1440px)
 - [ ] Accessibility: Semantic HTML, ARIA labels, keyboard navigation
-- [ ] Routes defined in `routes/web.php` and verified with `php artisan route:list`
-- [ ] Vite build passes: `npm run build`
+- [ ] Routes defined in `routes/web.php` and verified with `./vendor/bin/sail artisan route:list`
+- [ ] Vite build passes: `./vendor/bin/sail npm run build`
 
 ## Verification (run before marking complete)
-- [ ] `php artisan route:list` shows all expected routes
+- [ ] `./vendor/bin/sail artisan route:list` shows all expected routes
 - [ ] All acceptance criteria from feature spec addressed in UI
 - [ ] `features/INDEX.md` status updated to "In Progress"
 

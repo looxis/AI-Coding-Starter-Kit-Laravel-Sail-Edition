@@ -6,14 +6,16 @@
 
 | Category | Tool | Why? |
 |----------|------|------|
-| **Framework** | Laravel (PHP) | Full-stack MVC, batteries included |
+| **Framework** | Laravel 13 (PHP 8.5) | Full-stack MVC, batteries included |
 | **Templating** | Blade | Server-side templating with reusable component system |
-| **Styling** | Tailwind CSS v3 | Utility-first CSS |
+| **Styling** | Tailwind CSS v4 | Utility-first CSS, configured CSS-first in `resources/css/app.css` (`@theme`) — no `tailwind.config.js` |
 | **JS Framework** | Alpine.js | Lightweight reactive behavior in Blade templates |
 | **Database** | MySQL | Relational database, managed by Eloquent ORM |
 | **Validation** | Laravel Form Requests | Request validation + authorization in one class |
 | **Testing** | Laravel Pest | Expressive PHP testing framework |
-| **Local Dev** | Laravel Sail (Docker), PHP 8.3 | Containerized, no local PHP/Composer/Node needed |
+| **Auth** | Laravel Fortify | Headless auth backend with custom Blade views (Breeze is no longer used) |
+| **AI Tooling** | Laravel Boost | MCP server + Laravel guidelines for AI agents |
+| **Local Dev** | Laravel Sail (Docker), PHP 8.5, Node 24 | Containerized, no local PHP/Composer/Node needed |
 
 ## Project Structure
 
@@ -25,7 +27,9 @@ app/
     Middleware/        # Laravel Middleware
   Models/             # Eloquent Models
   Policies/           # Authorization Policies
-  Providers/          # Service Providers (AuthServiceProvider, etc.)
+  Providers/          # Service Providers (AppServiceProvider)
+bootstrap/
+  app.php             # Routing, middleware and exception configuration
 resources/
   views/              # Blade templates
     layouts/          # Master layouts
@@ -57,6 +61,12 @@ compose.yaml          # Laravel Sail / Docker services (app + mysql)
 - Always run project commands through `./vendor/bin/sail ...` (artisan, composer, npm, pest) rather than bare `php`/`composer`/`npm`.
 - Ports default to Sail's standard values (`APP_PORT=80`, `VITE_PORT=5173`, `FORWARD_DB_PORT=3306`). If multiple Sail projects run in parallel, override these in `.env`/`.env.example` to avoid collisions — see README for details.
 - Feature development should only start once `/init` has defined the actual product (`docs/PRD.md`) and this base Sail installation is documented and runnable.
+
+## Laravel Boost (MCP)
+
+- `laravel/boost` is installed as a dev dependency; its MCP server is registered in `.mcp.json` and runs through Sail (`vendor/bin/sail artisan boost:mcp`), so the containers must be up.
+- Prefer the Boost tools over guessing: search the version-specific Laravel docs, inspect the database schema, read application/browser logs, and run code via Tinker.
+- Project-specific AI guidelines go in `.ai/guidelines/*.md`; run `./vendor/bin/sail artisan boost:update` after changing them or after dependency upgrades.
 
 ## Development Workflow
 

@@ -32,25 +32,25 @@ Use `AskUserQuestion` for:
 - Should this be a web route (Blade response) or API route (JSON response)?
 
 ### 3. Create Database Schema
-1. Create migration: `php artisan make:migration create_[table]_table`
+1. Create migration: `./vendor/bin/sail artisan make:migration create_[table]_table`
 2. Define schema using Laravel's Schema Builder
 3. Add indexes in migration for frequently queried columns:
    ```php
    $table->index(['user_id', 'created_at']);
    $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
    ```
-4. Create Eloquent model with factory: `php artisan make:model [Model] -f`
+4. Create Eloquent model with factory: `./vendor/bin/sail artisan make:model [Model] -f`
 5. Define `$fillable` array on model (prevents mass assignment)
 6. Define relationships in model (`hasMany`, `belongsTo`, etc.)
-7. Run migration: `php artisan migrate`
+7. Run migration: `./vendor/bin/sail artisan migrate`
 
 ### 4. Create Controllers & Routes
-1. Create controller: `php artisan make:controller [Name]Controller --resource`
-2. Create FormRequest for validation: `php artisan make:request Store[Model]Request`
+1. Create controller: `./vendor/bin/sail artisan make:controller [Name]Controller --resource`
+2. Create FormRequest for validation: `./vendor/bin/sail artisan make:request Store[Model]Request`
    - Define `rules()` for validation rules
    - Define `authorize()` for request-level authorization
-3. Create Policy for authorization: `php artisan make:policy [Model]Policy --model=[Model]`
-   - Register policy in `app/Providers/AuthServiceProvider.php`
+3. Create Policy for authorization: `./vendor/bin/sail artisan make:policy [Model]Policy --model=[Model]`
+   - Policies in `app/Policies/` are auto-discovered — no manual registration needed
 4. Define routes in `routes/web.php` or `routes/api.php`
 5. Use `$request->validated()` in controllers — never validate in the controller directly
 
@@ -66,7 +66,7 @@ For each controller action, write a Pest Feature test in `tests/Feature/`:
 - Test authentication: unauthenticated request → 302 redirect to login
 - Test authorization: wrong user → 403
 
-Run tests: `php artisan test` or `./vendor/bin/pest`
+Run tests: `./vendor/bin/sail pest`
 
 ### 7. User Review
 - Walk user through the controllers, routes, and migrations created

@@ -8,13 +8,16 @@ Dieses Template nutzt [Claude Code](https://docs.anthropic.com/en/docs/claude-co
 
 | Category | Tool | Why? |
 |----------|------|------|
-| **Framework** | Laravel (PHP 8.3) | Full-stack MVC, batteries included |
+| **Framework** | Laravel 13 (PHP 8.5) | Full-stack MVC, batteries included |
 | **Templating** | Blade | Server-side templating mit Components |
-| **Styling** | Tailwind CSS v3 | Utility-first CSS |
+| **Styling** | Tailwind CSS v4 | Utility-first CSS, CSS-first-Konfiguration (`@theme` in `resources/css/app.css`) |
 | **JS Framework** | Alpine.js | Leichtgewichtige Reaktivität, kein SPA-Overhead |
 | **Database** | MySQL (im Container) | Relationale Datenbank via Eloquent ORM |
 | **Validation** | Laravel Form Requests | Validation + Authorization in einer Klasse |
 | **Testing** | Laravel Pest | Ausdrucksstarkes PHP-Testing |
+| **Auth** | Laravel Fortify | Headless Auth-Backend mit eigenen Blade-Views |
+| **AI Tooling** | Laravel Boost | MCP-Server + Laravel-Guidelines für AI-Agents |
+| **Build** | Vite 8 + `@tailwindcss/vite` | Asset-Build ohne PostCSS-Konfiguration |
 | **Local Dev** | **Laravel Sail (Docker) — ausschließlich** | Containerisiert, kein lokales PHP/Composer/Node nötig |
 
 > **Laravel Herd wird für dieses Projekt nicht verwendet.** Die lokale Entwicklung läuft ausschließlich über Docker + Laravel Sail innerhalb von WSL2/Ubuntu.
@@ -38,14 +41,14 @@ cd your-project
 cp .env.example .env
 ```
 
-Vor dem ersten `sail up` existiert `./vendor/bin/sail` noch nicht — die PHP-Abhängigkeiten werden daher einmalig über einen Wegwerf-Container installiert (kein lokales PHP/Composer nötig). Die App nutzt **PHP 8.3** — entsprechend wird das `php83-composer`-Image verwendet:
+Vor dem ersten `sail up` existiert `./vendor/bin/sail` noch nicht — die PHP-Abhängigkeiten werden daher einmalig über einen Wegwerf-Container installiert (kein lokales PHP/Composer nötig). Die App nutzt **PHP 8.5** — dafür wird das offizielle `composer`-Image verwendet (ein `laravelsail/php85-composer`-Image gibt es nicht):
 
 ```bash
 docker run --rm \
     -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" \
-    -w /var/www/html \
-    laravelsail/php83-composer:latest \
+    -v "$(pwd):/app" \
+    -w /app \
+    composer:latest \
     composer install --ignore-platform-reqs
 ```
 
@@ -60,6 +63,41 @@ Danach läuft alles über Sail:
 ```
 
 Die App ist danach erreichbar unter **http://localhost**.
+
+### Laravel Boost einrichten (einmalig)
+
+[Laravel Boost](https://github.com/laravel/boost) ist bereits als Dev-Dependency enthalten und der MCP-Server in `.mcp.json` für Sail eingetragen. Guidelines und Skills für Claude Code installierst du einmalig interaktiv:
+
+```bash
+./vendor/bin/sail artisan boost:install
+```
+
+Im Dialog **Claude Code** und **Laravel Sail** auswählen. Boost schreibt seine Guidelines in einen eigenen `<laravel-boost-guidelines>`-Block in `CLAUDE.md`; der Rest der Datei bleibt erhalten. Der MCP-Server läuft im Container — die Sail-Container müssen also gestartet sein, und Claude Code muss in WSL laufen. Nach Dependency-Upgrades: `./vendor/bin/sail artisan boost:update`.
+
+## Skeleton per `laravel new` neu erzeugen oder abgleichen
+
+Laravel-Projekte werden inzwischen über den Installer gestartet (`laravel new`, siehe [Installation](https://laravel.com/framework/docs/installation)). Dieses Repo enthält das Ergebnis bereits fertig konfiguriert. Um das Skeleton später auf einen frischen Stand zu bringen, erzeugst du in einem Wegwerf-Container ein Referenzprojekt und übernimmst die Unterschiede:
+
+```bash
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/app" \
+    -w /app \
+    composer:latest \
+    sh -c 'composer global require laravel/installer \
+        && "$(composer global config bin-dir --absolute -q)/laravel" new reference-app \
+            --database=mysql --pest --no-authentication --no-node --boost --no-interaction'
+```
+
+Die Flags entsprechen dem Stack dieses Kits: MySQL, Pest, kein Starter Kit (Blade + Alpine statt React/Vue/Svelte/Livewire), Boost. Danach `reference-app/` mit diesem Repo vergleichen (`composer.json`, `package.json`, `vite.config.js`, `config/`, `bootstrap/`) und das Verzeichnis wieder löschen. Kit-spezifisch bleiben: `.claude/`, `CLAUDE.md`, `docs/`, `features/`, `compose.yaml`, Alpine.js und Pest.
+
+Mit lokalem PHP (nicht der Standardweg dieses Kits) installiert `php.new` PHP 8.5, Composer und den Installer in einem Schritt:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
+```
+
+> Die Agent-Anleitung unter https://laravel.com/for/agents geht von anderen Defaults aus (React Starter Kit, SQLite, `composer run dev` auf Port 8000). In diesem Kit gelten stattdessen Blade + Alpine, MySQL und Sail auf `http://localhost`.
 
 ## Ports
 
@@ -116,7 +154,7 @@ where users can create projects, assign tasks, and track progress.
 Die Skill interviewt dich Schritt für Schritt (**Grill Me**-Prinzip — immer mit einer Empfehlung, die du bestätigst oder korrigierst), bis ein gemeinsames Verständnis besteht. Danach:
 1. Erstellt sie dein **Product Requirements Document** (`docs/PRD.md`)
 2. Bricht das Projekt in eine priorisierte Feature-Map herunter (P0/P1/P2)
-3. Entscheidet über Auth und lokales Dev-Setup
+3. Entscheidet über Auth (Laravel Fortify) und Design System
 4. Aktualisiert das **Feature Tracking** (`features/INDEX.md`)
 5. Empfiehlt das erste zu bauende Feature
 
@@ -188,6 +226,7 @@ Features sind in `features/INDEX.md` getrackt. Jede Skill liest diese Datei bei 
 your-project/
 +-- CLAUDE.md                        <-- Auto-loaded project context
 +-- compose.yaml                     <-- Sail/Docker services (app + mysql)
++-- .mcp.json                        <-- Laravel Boost MCP server (via Sail)
 +-- .claude/
 |   +-- settings.json                <-- Team permissions (committed)
 |   +-- settings.local.json          <-- Personal overrides (gitignored)

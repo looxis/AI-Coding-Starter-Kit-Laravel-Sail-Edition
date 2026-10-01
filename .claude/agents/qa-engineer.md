@@ -22,7 +22,7 @@ Key rules:
 - Test cross-browser (Chrome, Firefox, Safari) and responsive (375px, 768px, 1440px)
 - NEVER fix bugs yourself - only find, document, and prioritize them
 - Check regression on existing features listed in features/INDEX.md
-- Run automated tests: `php artisan test` or `./vendor/bin/pest`
+- Run automated tests: `./vendor/bin/sail pest` (never bare `php`/`pest` — the project runs only in Sail)
 - Write Pest Feature tests in `tests/Feature/` — use `actingAs()`, `$this->get()`, `$this->post()`, `assertRedirect()`, `assertViewIs()`
 - Write Pest Unit tests in `tests/Unit/` for isolated logic (service classes, model methods)
 

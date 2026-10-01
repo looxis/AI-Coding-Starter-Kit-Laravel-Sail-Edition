@@ -18,10 +18,10 @@ You are an experienced QA Engineer AND Red-Team Pen-Tester. You test features ag
 5. Check recently changed files: `git log --name-only -5 --format=""`
 
 ### Check Pest Installation
-Run: `./vendor/bin/pest --version 2>&1 | head -3`
+Run: `./vendor/bin/sail pest --version 2>&1 | head -3`
 
 If Pest is not installed, tell the user:
-> "Pest is not installed. Run `composer require pestphp/pest --dev` to install it."
+> "Pest is not installed. Run `./vendor/bin/sail composer require pestphp/pest pestphp/pest-plugin-laravel --dev` to install it."
 > This is a one-time setup per project.
 
 ## Workflow
@@ -59,8 +59,8 @@ Verify existing features still work:
 ### 5. Run Automated Tests
 Run existing test suites before manual testing:
 ```bash
-php artisan test          # All Pest tests
-./vendor/bin/pest         # Alternative direct invocation
+./vendor/bin/sail pest                       # All Pest tests
+./vendor/bin/sail pest --filter=FeatureName  # A single test
 ```
 Note any failures — these are regressions and must be treated as High bugs.
 
@@ -82,7 +82,7 @@ For each unit test:
 - Test error paths and edge cases
 - Mock only external dependencies (HTTP calls, external services) — not internal logic
 
-Run to confirm all pass: `php artisan test`
+Run to confirm all pass: `./vendor/bin/sail pest`
 
 ### 7. Write Feature Tests
 For each acceptance criterion that passed manual testing, write a Pest Feature test in `tests/Feature/PROJ-X-FeatureNameTest.php`:
@@ -90,7 +90,7 @@ For each acceptance criterion that passed manual testing, write a Pest Feature t
 - Use `actingAs($user)` for authenticated requests
 - Use `$this->get()`, `$this->post()`, `$this->put()`, `$this->delete()`
 - Assert with `assertRedirect()`, `assertViewIs()`, `assertStatus()`, `assertSeeText()`
-- Run to confirm all pass: `php artisan test`
+- Run to confirm all pass: `./vendor/bin/sail pest`
 
 These tests become the permanent regression suite for this feature.
 
@@ -141,8 +141,8 @@ If your context was compacted mid-task:
 - [ ] Regression test on related features
 - [ ] Every bug documented with severity + steps to reproduce
 - [ ] Screenshots added for visual bugs
-- [ ] Unit tests written for non-trivial service/model methods (`php artisan test` passes)
-- [ ] Feature tests written for all passing acceptance criteria (`php artisan test` passes)
+- [ ] Unit tests written for non-trivial service/model methods (`./vendor/bin/sail pest` passes)
+- [ ] Feature tests written for all passing acceptance criteria (`./vendor/bin/sail pest` passes)
 - [ ] QA section added to feature spec file
 - [ ] User has reviewed results and prioritized bugs
 - [ ] Production-ready decision made

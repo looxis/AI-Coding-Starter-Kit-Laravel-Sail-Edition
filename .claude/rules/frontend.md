@@ -26,7 +26,8 @@ paths:
 - Never submit a POST/PUT/PATCH/DELETE form without `@csrf`
 
 ## Component Standards
-- Use Tailwind CSS exclusively (no inline styles, no CSS modules)
+- Use Tailwind CSS v4 exclusively (no inline styles, no CSS modules)
+- Tailwind is configured CSS-first: define design tokens (colors, fonts, spacing) in the `@theme` block of `resources/css/app.css` — there is no `tailwind.config.js` or PostCSS config
 - All templates must be responsive (mobile 375px, tablet 768px, desktop 1440px)
 - Implement loading states (Alpine.js `x-show` + spinner), error states, and empty states
 - Use semantic HTML and ARIA labels for accessibility

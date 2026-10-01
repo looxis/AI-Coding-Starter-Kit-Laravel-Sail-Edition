@@ -52,24 +52,20 @@ Ask:
 
 **If yes → follow up:**
 > "Does the app need user authentication (login/register)?"
-> My recommendation: Yes if users need private data. We'll use Laravel Breeze for the auth scaffolding — it's the fastest path to working login/register.
+> My recommendation: Yes if users need private data. We'll use Laravel Fortify for the auth backend (login, registration, password reset, optional 2FA) with our own Blade + Alpine views — the same foundation Laravel's official starter kits use.
 
 **If authentication is needed:**
 - Add **"Laravel Authentication Setup"** as **PROJ-1, P0** in the feature map
 - All features that require a logged-in user must list PROJ-1 as a dependency
-- This feature covers: `php artisan breeze:install`, running migrations, auth routes (login, register, password reset), and auth middleware
+- This feature covers: `./vendor/bin/sail composer require laravel/fortify`, `./vendor/bin/sail artisan fortify:install`, running migrations, Blade views for the Fortify routes (login, register, password reset), and auth middleware
+- Do NOT use Laravel Breeze — it is no longer part of the current Laravel documentation
 
 **If no authentication (public app):**
 - No auth infrastructure feature needed
 - Note "No authentication — public app" in the PRD Constraints section
 
-### Mandatory: Local Dev Setup (ask before building the feature map)
-Ask:
-> "For local development, would you prefer **Laravel Herd** (simpler, native, no Docker) or **Laravel Sail** (Docker-based, portable)?"
-> My recommendation: Herd — it's faster to set up on Windows/Mac and has zero Docker overhead. Choose Sail if you need a reproducible Docker environment across machines.
-
-- If **Herd**: Note "Dev: Laravel Herd" in PRD Constraints. Commands use `php artisan` directly.
-- If **Sail**: Note "Dev: Laravel Sail (Docker)" in PRD Constraints. Commands use `./vendor/bin/sail artisan`.
+### Local Dev Setup (fixed — do not ask)
+This kit runs exclusively on **Laravel Sail (Docker)** with PHP 8.5. Note "Dev: Laravel Sail (Docker)" in PRD Constraints. All commands use `./vendor/bin/sail ...` — never bare `php`/`composer`/`npm`, and never Laravel Herd.
 
 ### Mandatory: Design System (ask before building the feature map)
 Ask:
@@ -84,7 +80,7 @@ Ask:
 **If a design system is provided:**
 - Save it to `docs/design-system.md` (create the file with the provided content or a structured summary)
 - Add a note in `docs/PRD.md` under Constraints: "Design system: see `docs/design-system.md`"
-- The `/frontend` skill will read this file when building UI components
+- The `/frontend` skill will read this file when building UI components and maps its colors/fonts to Tailwind v4 design tokens (`@theme` in `resources/css/app.css`)
 
 ## After the Interview: Create the PRD
 
@@ -132,7 +128,7 @@ Apply feedback, then update `features/INDEX.md` and the "Next Available ID" line
 - [ ] If auth needed: "Laravel Authentication Setup" added as PROJ-1, P0
 - [ ] If auth needed: all features requiring logged-in users list PROJ-1 as dependency
 - [ ] If no auth: noted "No authentication — public app" in PRD Constraints
-- [ ] Local dev setup decision resolved (Herd vs Sail) and noted in PRD Constraints
+- [ ] "Dev: Laravel Sail (Docker)" noted in PRD Constraints
 - [ ] Design system decision resolved
 - [ ] If design system provided: saved to `docs/design-system.md` and referenced in PRD
 - [ ] Every feature respects Single Responsibility
